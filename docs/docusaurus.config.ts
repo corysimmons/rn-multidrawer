@@ -15,18 +15,21 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://yourusername.github.io',
+  url: 'https://fisher.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/rn-multidrawer/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'yourusername', // Usually your GitHub org/user name.
-  projectName: 'react-native-multidrawer', // Usually your repo name.
+  organizationName: 'fisher', // Usually your GitHub org/user name.
+  projectName: 'rn-multidrawer', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
+  
+  // Deployment mode
+  trailingSlash: false,
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -46,7 +49,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/yourusername/react-native-multidrawer/tree/main/docs/',
+            'https://github.com/fisher/rn-multidrawer/tree/main/docs/',
         },
         blog: false,
         pages: false,
@@ -74,7 +77,7 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/yourusername/react-native-multidrawer',
+          href: 'https://github.com/fisher/rn-multidrawer',
           label: 'GitHub',
           position: 'right',
         },
@@ -88,11 +91,11 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/intro',
+              to: '/',
             },
             {
               label: 'API Reference',
-              to: '/docs/api/drawer-provider',
+              to: '/api/drawer-provider',
             },
           ],
         },
@@ -101,7 +104,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Issues',
-              href: 'https://github.com/yourusername/react-native-multidrawer/issues',
+              href: 'https://github.com/fisher/rn-multidrawer/issues',
             },
             {
               label: 'Stack Overflow',
@@ -114,7 +117,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/yourusername/react-native-multidrawer',
+              href: 'https://github.com/fisher/rn-multidrawer',
             },
             {
               label: 'npm',
