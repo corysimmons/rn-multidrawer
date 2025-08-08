@@ -15,14 +15,14 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://fisher.github.io',
+  url: 'https://corysimmons.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/rn-multidrawer/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'fisher', // Usually your GitHub org/user name.
+  organizationName: 'corysimmons', // Usually your GitHub org/user name.
   projectName: 'rn-multidrawer', // Usually your repo name.
 
   onBrokenLinks: 'throw',
@@ -49,7 +49,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/fisher/rn-multidrawer/tree/main/docs/',
+            'https://github.com/corysimmons/rn-multidrawer/tree/main/docs/',
         },
         blog: false,
         pages: false,
@@ -77,7 +77,7 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/fisher/rn-multidrawer',
+          href: 'https://github.com/corysimmons/rn-multidrawer',
           label: 'GitHub',
           position: 'right',
         },
@@ -104,7 +104,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Issues',
-              href: 'https://github.com/fisher/rn-multidrawer/issues',
+              href: 'https://github.com/corysimmons/rn-multidrawer/issues',
             },
             {
               label: 'Stack Overflow',
@@ -117,7 +117,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/fisher/rn-multidrawer',
+              href: 'https://github.com/corysimmons/rn-multidrawer',
             },
             {
               label: 'npm',
