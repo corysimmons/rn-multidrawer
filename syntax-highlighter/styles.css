@@ -1,0 +1,102 @@
+.syntax-highlight {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0;
+  border: 1px solid #333;
+}
+
+.syntax-highlight code {
+  display: block;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.keyword {
+  color: #569cd6;
+  font-weight: bold;
+}
+
+.string {
+  color: #ce9178;
+}
+
+.number {
+  color: #b5cea8;
+}
+
+.comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.operator {
+  color: #d4d4d4;
+}
+
+.identifier {
+  color: #9cdcfe;
+}
+
+.punctuation {
+  color: #d4d4d4;
+}
+
+.whitespace {
+  color: inherit;
+}
+
+.unknown {
+  color: #f44747;
+  background-color: #5a1d1d;
+}
+
+/* Light theme variant */
+.syntax-highlight.light {
+  background-color: #ffffff;
+  color: #24292e;
+  border: 1px solid #e1e4e8;
+}
+
+.light .keyword {
+  color: #d73a49;
+}
+
+.light .string {
+  color: #032f62;
+}
+
+.light .number {
+  color: #005cc5;
+}
+
+.light .comment {
+  color: #6a737d;
+}
+
+.light .operator {
+  color: #24292e;
+}
+
+.light .identifier {
+  color: #6f42c1;
+}
+
+.light .punctuation {
+  color: #24292e;
+}
+
+.light .unknown {
+  color: #d73a49;
+  background-color: #ffeef0;
+}

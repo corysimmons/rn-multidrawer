@@ -1,0 +1,48 @@
+# Development files
+__tests__/
+*.test.ts
+*.test.tsx
+jest.config.js
+jest.setup.js
+.eslintrc.*
+eslint.config.js
+
+# Documentation
+docs/
+ANIMATION_APPROACH.md
+CLAUDE.md
+DEV_NOTES.md
+CONTRIBUTING.md
+
+# Build files
+tsconfig.json
+src/
+
+# Example app
+example/
+app/
+app.json
+assets/
+expo-env.d.ts
+
+# Original components (deprecated)
+components/
+
+# Development dependencies
+node_modules/
+package-lock.json
+
+# Environment
+.env*
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore

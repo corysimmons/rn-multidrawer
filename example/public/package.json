@@ -1,0 +1,12 @@
+{
+  "name": "custom-syntax-highlighter",
+  "version": "1.0.0",
+  "description": "A simple syntax highlighter built from scratch",
+  "main": "highlighter.js",
+  "scripts": {
+    "demo": "node demo.js"
+  },
+  "keywords": ["syntax", "highlighting", "code", "parser"],
+  "author": "",
+  "license": "MIT"
+}
