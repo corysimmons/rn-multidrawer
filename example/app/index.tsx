@@ -65,7 +65,9 @@ const layouts = [
 export default function Index() {
   return (
     <ScrollView className="flex-1 bg-gray-100 selectable-text">
-      <View className="p-6 pt-16 items-center bg-white border-b border-gray-200 shadow-sm">
+      <View 
+        className="p-6 pt-16 items-center bg-white border-b border-gray-200"
+      >
         <Text className="text-4xl font-black text-blue-700 mb-3 text-center tracking-tight">MultiDrawer Layouts</Text>
         <Text className="text-lg text-gray-600 text-center font-medium leading-relaxed">
           Explore the {layouts.length} essential drawer layout configurations
@@ -79,7 +81,9 @@ export default function Index() {
             href={`/layouts/${layout.name}` as any}
             asChild
           >
-            <TouchableOpacity className="bg-white rounded-2xl p-6 shadow-lg shadow-blue-500/10 border border-gray-200 active:scale-95 transition-transform">
+            <TouchableOpacity 
+              className="bg-white rounded-2xl p-6 border border-gray-200 active:scale-95 transition-transform"
+            >
               <View className="mb-5">
                 <Text className="text-2xl font-black text-gray-800 mb-2 text-center tracking-tight">{layout.title}</Text>
                 <Text className="text-sm text-gray-600 leading-6 text-center font-medium">{layout.description}</Text>

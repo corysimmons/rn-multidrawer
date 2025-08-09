@@ -263,31 +263,33 @@ const DrawerControlsSection: React.FC = () => {
   };
 
   return (
-    <View className="bg-white rounded-xl p-5 mb-6 w-full border border-blue-200 shadow-md shadow-blue-500/10">
+    <View 
+      className="bg-white rounded-xl p-5 mb-6 w-full border border-blue-200"
+    >
       <Text className="text-lg text-blue-700 text-center font-semibold leading-relaxed mb-4">
         🎮 Drawer Controls
       </Text>
       <View className="flex-row flex-wrap justify-center gap-2">
         <TouchableOpacity
-          className="bg-blue-600 px-4 py-2 rounded-lg shadow-sm"
+          className="bg-blue-600 px-4 py-2 rounded-lg"
           onPress={() => toggleDrawer('left')}
         >
           <Text className="text-white font-semibold text-sm">← Left</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="bg-green-600 px-4 py-2 rounded-lg shadow-sm"
+          className="bg-green-600 px-4 py-2 rounded-lg"
           onPress={() => toggleDrawer('top')}
         >
           <Text className="text-white font-semibold text-sm">↑ Top</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="bg-purple-600 px-4 py-2 rounded-lg shadow-sm"
+          className="bg-purple-600 px-4 py-2 rounded-lg"
           onPress={() => toggleDrawer('right')}
         >
           <Text className="text-white font-semibold text-sm">Right →</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className="bg-orange-600 px-4 py-2 rounded-lg shadow-sm"
+          className="bg-orange-600 px-4 py-2 rounded-lg"
           onPress={() => toggleDrawer('bottom')}
         >
           <Text className="text-white font-semibold text-sm">↓ Bottom</Text>
@@ -301,7 +303,9 @@ const LeftDrawerContent: React.FC = () => {
   const { closeDrawerAnimated } = useDrawer();
 
   return (
-    <View className="flex-1 bg-white shadow-lg shadow-blue-500/20">
+    <View 
+      className="flex-1 bg-white"
+    >
       <View className="absolute right-0 top-0 w-60 h-full justify-center items-center">
         <Text className="text-2xl font-bold text-gray-800">Left Drawer</Text>
         <TouchableOpacity
@@ -319,7 +323,9 @@ const RightDrawerContent: React.FC = () => {
   const { closeDrawerAnimated } = useDrawer();
 
   return (
-    <View className="flex-1 bg-white shadow-lg shadow-blue-500/20">
+    <View 
+      className="flex-1 bg-white"
+    >
       <View className="absolute left-0 top-0 w-60 h-full justify-center items-center">
         <Text className="text-2xl font-bold text-gray-800">Right Drawer</Text>
         <TouchableOpacity
@@ -338,7 +344,17 @@ const TopDrawerContent: React.FC<{ height: number }> = ({ height }) => {
   const visibleSize = height / 2;
 
   return (
-    <View className="absolute bottom-0 left-0 w-full bg-white shadow-lg shadow-blue-500/20 justify-center items-center" style={{ height: visibleSize }}>
+    <View 
+      className="absolute bottom-0 left-0 w-full bg-white justify-center items-center" 
+      style={{ 
+        height: visibleSize,
+        shadowColor: '#3b82f6',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 10,
+      }}
+    >
       <Text className="text-2xl font-bold text-gray-800">Top Drawer</Text>
       <TouchableOpacity
         className="bg-red-500 px-4 py-2 rounded-lg mt-4"
@@ -355,7 +371,17 @@ const BottomDrawerContent: React.FC<{ height: number }> = ({ height }) => {
   const visibleSize = height / 2;
 
   return (
-    <View className="absolute top-0 left-0 w-full bg-white shadow-lg shadow-blue-500/20 justify-center items-center" style={{ height: visibleSize }}>
+    <View 
+      className="absolute top-0 left-0 w-full bg-white justify-center items-center" 
+      style={{ 
+        height: visibleSize,
+        shadowColor: '#3b82f6',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        elevation: 10,
+      }}
+    >
       <Text className="text-2xl font-bold text-gray-800">Bottom Drawer</Text>
       <TouchableOpacity
         className="bg-red-500 px-4 py-2 rounded-lg mt-4"
@@ -375,10 +401,14 @@ export default function LayoutDemo() {
   if (!info) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-100">
-        <View className="bg-white rounded-2xl p-8 shadow-lg shadow-blue-500/10 border border-gray-200">
+        <View 
+          className="bg-white rounded-2xl p-8 border border-gray-200"
+        >
           <Text className="text-lg text-red-600 mb-5 text-center font-semibold">Layout not found: {layout}</Text>
           <Link href="/" asChild>
-            <TouchableOpacity className="bg-blue-600 px-6 py-3 rounded-xl shadow-md shadow-blue-500/20 border border-blue-500">
+            <TouchableOpacity 
+              className="bg-blue-600 px-6 py-3 rounded-xl border border-blue-500"
+            >
               <Text className="text-white font-bold text-base text-center">← Back to Layouts</Text>
             </TouchableOpacity>
           </Link>
@@ -395,14 +425,25 @@ export default function LayoutDemo() {
           <Text className="text-4xl font-black text-blue-700 mb-3 text-center tracking-tight">{info.title}</Text>
           <Text className="text-lg text-gray-700 text-center mb-6 leading-relaxed font-medium">{info.description}</Text>
 
-          <View className="bg-white rounded-2xl p-6 mb-6 shadow-lg shadow-blue-500/10 border border-gray-200 w-full">
+          <View 
+            className="bg-white rounded-2xl p-6 mb-6 border border-gray-200 w-full"
+            style={{
+              shadowColor: '#3b82f6',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.1,
+              shadowRadius: 10,
+              elevation: 10,
+            }}
+          >
             <Text className="font-mono text-base text-gray-800 leading-5 text-center">{info.ascii}</Text>
           </View>
 
           <DrawerControlsSection />
 
           {/* Code Examples */}
-          <View className="bg-slate-900 rounded-xl p-4 mb-8 w-full border border-slate-700 shadow-md shadow-slate-500/10">
+          <View 
+            className="bg-slate-900 rounded-xl p-4 mb-8 w-full border border-slate-700"
+          >
             <Text className="text-lg text-slate-100 font-bold mb-4 text-center">💻 Code Example</Text>
 
             {layoutName === 'fullscreen' && (
@@ -435,7 +476,9 @@ export default function LayoutDemo() {
           </View>
 
           <Link href="/" asChild>
-            <TouchableOpacity className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl shadow-lg shadow-blue-500/25 active:scale-95 transition-transform border border-blue-500">
+            <TouchableOpacity 
+              className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl active:scale-95 transition-transform border border-blue-500"
+            >
               <Text className="text-white font-bold text-lg text-center">← Back to Layouts</Text>
             </TouchableOpacity>
           </Link>

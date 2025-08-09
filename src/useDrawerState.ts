@@ -1,4 +1,4 @@
-import { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue, runOnJS } from 'react-native-reanimated';
 import { Gesture } from 'react-native-gesture-handler';
 import { useEffect, useState } from 'react';
 import { Dimensions } from 'react-native';
@@ -36,9 +36,8 @@ export interface UseDrawerStateReturn {
   open: () => void;
   close: () => void;
   
-  // Progress values (for custom animations)
-  progress: any; // SharedValue<number>
-  animationState: any; // SharedValue<'gesture' | 'spring' | 'static'>
+  // Note: Removed progress and animationState SharedValues to prevent access during render
+  // These values should only be accessed within useAnimatedStyle worklets
 }
 
 export const useDrawerState = ({
@@ -103,24 +102,8 @@ export const useDrawerState = ({
     return () => unregisterDrawer(side);
   }, [side, hitboxSize, snapOpenThreshold, snapCloseThreshold, animationSpeed, bounciness]);
 
-  // Reset close translations when main gestures start/end (to prevent interference)
-  useEffect(() => {
-    if (activeDrawer === null) {
-      // No active drawer - reset close translations to prevent interference with spring animations
-      closeTranslationX.value = 0;
-      closeTranslationY.value = 0;
-    } else if (activeDrawer !== side) {
-      // Another drawer is being activated - reset our close translations
-      closeTranslationX.value = 0;
-      closeTranslationY.value = 0;
-    }
-  }, [activeDrawer, side, closeTranslationX, closeTranslationY]);
-
-  // Sync drawer open state to shared value
-  useEffect(() => {
-    const drawerIsOpen = isDrawerOpen(side);
-    isOpen.value = drawerIsOpen;
-  }, [isDrawerOpen, side, isOpen]);
+  // Note: Removed useEffect hooks that were modifying shared values during render
+  // These operations are now handled within gesture worklets where appropriate
 
   // Calculate progress for closing gesture (opposite direction from opening)
   const calculateCloseProgress = (translation: { x: number; y: number }, drawerSide: string): number => {
@@ -149,34 +132,70 @@ export const useDrawerState = ({
   const closeGesture = Gesture.Pan()
     .enabled(isDrawerOpen(side))
     .onStart(() => {
+      'worklet';
       // Set global user-select none during close gesture (web only)
-      setGlobalUserSelectNone();
+      runOnJS(setGlobalUserSelectNone)();
       
       // Bring this drawer to front immediately when starting to interact
-      openDrawer(side);
+      runOnJS(openDrawer)(side);
       
       // Set animation state to 'gesture' for close gesture (same as opening)
-      if (animationState[side].value === 'static') {
-        animationState[side].value = 'gesture';
+      const animationStateSharedValue = side === 'top' ? animationState.top :
+                                      side === 'right' ? animationState.right :
+                                      side === 'bottom' ? animationState.bottom :
+                                      animationState.left;
+      if (animationStateSharedValue.value === 'static') {
+        animationStateSharedValue.value = 'gesture';
         closeTranslationX.value = 0;
         closeTranslationY.value = 0;
       }
     })
     .onUpdate((event) => {
+      'worklet';
       // Update close translations during gesture
-      if (animationState[side].value === 'gesture') {
+      const animationStateSharedValue = side === 'top' ? animationState.top :
+                                      side === 'right' ? animationState.right :
+                                      side === 'bottom' ? animationState.bottom :
+                                      animationState.left;
+      if (animationStateSharedValue.value === 'gesture') {
         closeTranslationX.value = event.translationX;
         closeTranslationY.value = event.translationY;
         
-        // Close gesture update processed
+        // Update currentProgress during close gesture for smooth animations
+        const currentProgressSharedValue = side === 'top' ? currentProgress.top :
+                                         side === 'right' ? currentProgress.right :
+                                         side === 'bottom' ? currentProgress.bottom :
+                                         currentProgress.left;
+        
+        let closeProgress = 0;
+        const actualDrawerSize = 240;
+        
+        if (side === 'left') {
+          closeProgress = Math.abs(Math.min(0, event.translationX)) / actualDrawerSize;
+        } else if (side === 'right') {
+          closeProgress = Math.max(0, event.translationX) / actualDrawerSize;
+        } else if (side === 'top') {
+          closeProgress = Math.abs(Math.min(0, event.translationY)) / actualDrawerSize;
+        } else if (side === 'bottom') {
+          closeProgress = Math.max(0, event.translationY) / actualDrawerSize;
+        }
+        
+        // Interpolate from fully open (1) towards closed (0)
+        const progress = 1 - Math.min(closeProgress, 1);
+        currentProgressSharedValue.value = progress;
       }
     })
     .onEnd((event) => {
+      'worklet';
       // Remove global user-select none when close gesture ends (web only)
-      removeGlobalUserSelectNone();
+      runOnJS(removeGlobalUserSelectNone)();
       
       // Process close gesture using the same snap logic as opening
-      if (animationState[side].value === 'gesture') {
+      const animationStateSharedValue = side === 'top' ? animationState.top :
+                                      side === 'right' ? animationState.right :
+                                      side === 'bottom' ? animationState.bottom :
+                                      animationState.left;
+      if (animationStateSharedValue.value === 'gesture') {
         const closeProgress = calculateCloseProgress(
           { x: event.translationX, y: event.translationY },
           side
@@ -195,9 +214,10 @@ export const useDrawerState = ({
       closeTranslationY.value = 0;
     })
     .onFinalize((event, success) => {
+      'worklet';
       // Always re-enable text selection when close gesture finishes, regardless of success
       if (!success) {
-        removeGlobalUserSelectNone();
+        runOnJS(removeGlobalUserSelectNone)();
       }
     });
 
@@ -205,8 +225,9 @@ export const useDrawerState = ({
   const tapGesture = Gesture.Tap()
     .enabled(isDrawerOpen(side))
     .onStart(() => {
+      'worklet';
       // Bring this drawer to front immediately when tapped
-      openDrawer(side);
+      runOnJS(openDrawer)(side);
     });
 
   // Combine gestures
@@ -218,7 +239,18 @@ export const useDrawerState = ({
     let translateY = 0;
     let progress = 0;
     
-    const currentState = animationState[side].value;
+    // Get individual SharedValues to avoid Record object shareable issues
+    const currentProgressSharedValue = side === 'top' ? currentProgress.top :
+                                     side === 'right' ? currentProgress.right :
+                                     side === 'bottom' ? currentProgress.bottom :
+                                     currentProgress.left;
+    
+    const animationStateSharedValue = side === 'top' ? animationState.top :
+                                    side === 'right' ? animationState.right :
+                                    side === 'bottom' ? animationState.bottom :
+                                    animationState.left;
+    
+    const currentState = animationStateSharedValue.value;
     
     // State-based animation control - only ONE system has authority at a time
     if (currentState === 'gesture') {
@@ -246,8 +278,7 @@ export const useDrawerState = ({
         // Interpolate from fully open (1) towards closed (0)
         progress = 1 - Math.min(closeProgress, 1);
         
-        // Update current progress during close gesture for smooth transition to spring
-        currentProgress[side].value = progress;
+        // Don't write to shared values in animatedStyle - this causes render warnings
         
         // Close gesture progress calculated
         
@@ -259,24 +290,23 @@ export const useDrawerState = ({
         );
         progress = Math.max(0, Math.min(1, gestureProgress));
         
-        // Update current progress during gesture for smooth transition to spring
-        currentProgress[side].value = progress;
+        // Don't write to shared values in animatedStyle - this causes render warnings
         
         // Main gesture progress calculated
       } else {
         // Gesture state but no active translation - use current progress
-        progress = currentProgress[side].value;
+        progress = currentProgressSharedValue.value;
       }
       
     } else if (currentState === 'spring') {
       // SPRING MODE: Spring animation has exclusive control
-      progress = currentProgress[side].value;
+      progress = currentProgressSharedValue.value;
       
       // Spring animation in progress
       
     } else if (currentState === 'static') {
       // STATIC MODE: Use final state, drawer is at rest
-      progress = currentProgress[side].value;
+      progress = currentProgressSharedValue.value;
     }
     
     // Base positioning based on progress (closed = fully off-screen)
@@ -326,7 +356,7 @@ export const useDrawerState = ({
     height,
     open: () => openDrawer(side),
     close: () => closeDrawerAnimated(side),
-    progress: currentProgress[side],
-    animationState: animationState[side],
+    // Note: Removed direct shared value exports to prevent access during render
+    // progress and animationState should only be accessed within useAnimatedStyle worklets
   };
 };

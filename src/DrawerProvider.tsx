@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { useSharedValue, withSpring, runOnJS } from 'react-native-reanimated';
+import { useSharedValue, withSpring, runOnJS, runOnUI } from 'react-native-reanimated';
 
 import { DrawerSide, DrawerContextValue, DrawerProviderProps, DrawerConfig } from './types';
 import { isWithinHitbox, calculateProgress } from './utils';
@@ -177,7 +177,6 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
       document.body.style.setProperty('-webkit-user-select', 'none', 'important');
       document.body.style.setProperty('user-select', 'none', 'important');
       
-      console.log('Text selection completely disabled');
     }
   }, []);
 
@@ -192,7 +191,6 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
       document.body.style.removeProperty('-webkit-user-select');
       document.body.style.removeProperty('user-select');
       
-      console.log('Text selection enabled');
     }
   }, []);
 
@@ -217,7 +215,6 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
   }, [drawerOpenOrder]);
 
   const snapToPosition = useCallback((side: DrawerSide, progress: number) => {
-    'worklet';
     const config = drawerConfigs[side];
     if (!config) return;
 
@@ -230,49 +227,71 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
       targetProgressValue = 0;
     }
     
-    // Debug logging removed for performance
-
-    // Set animation state to 'spring' - this gives spring animation exclusive control
-    animationState[side].value = 'spring';
-    
-    const springConfig = {
-      damping: 20 - (bounciness * 10),
-      mass: 1,
-      stiffness: 100 + (animationSpeed * 100),
-    };
-    
-    
-    // Animate to target progress with exclusive control during spring phase
-    currentProgress[side].value = withSpring(targetProgressValue, springConfig, (finished) => {
-      'worklet';
-      if (finished) {
-        // Spring animation completed - switch to static mode
-        animationState[side].value = 'static';
-        
-        // If drawer was closed (progress 0), remove from z-index order after animation
-        if (targetProgressValue === 0) {
-          // Use runOnJS to call React state update from worklet
-          runOnJS(removeFromZIndexOrder)(side);
-        }
-        
-        // Spring completed - drawer is now static
-      } else {
-        // Spring was cancelled
-      }
-    });
-    
-    // Also update target progress for consistency
-    targetProgress[side].value = targetProgressValue;
-
-    // Update drawer state
+    // Update drawer state immediately (React context)
     if (targetProgressValue === 1) {
-      runOnJS(openDrawer)(side);
+      openDrawer(side);
     } else if (targetProgressValue === 0) {
-      runOnJS(closeDrawer)(side);
+      closeDrawer(side);
     }
 
+    // Queue shared value updates to run on UI thread
+    const animationWorklet = () => {
+      'worklet';
+      
+      // Get individual SharedValues to avoid Record object shareable issues
+      const currentProgressSharedValue = side === 'top' ? currentProgressTop :
+                                       side === 'right' ? currentProgressRight :
+                                       side === 'bottom' ? currentProgressBottom :
+                                       currentProgressLeft;
+      
+      const targetProgressSharedValue = side === 'top' ? targetProgressTop :
+                                      side === 'right' ? targetProgressRight :
+                                      side === 'bottom' ? targetProgressBottom :
+                                      targetProgressLeft;
+      
+      const animationStateSharedValue = side === 'top' ? animationStateTop :
+                                      side === 'right' ? animationStateRight :
+                                      side === 'bottom' ? animationStateBottom :
+                                      animationStateLeft;
+
+      // Set animation state to 'spring' - this gives spring animation exclusive control
+      animationStateSharedValue.value = 'spring';
+      
+      const springConfig = {
+        damping: 20 - (bounciness * 10),
+        mass: 1,
+        stiffness: 100 + (animationSpeed * 100),
+      };
+      
+      // Animate to target progress with exclusive control during spring phase
+      currentProgressSharedValue.value = withSpring(targetProgressValue, springConfig, (finished) => {
+        'worklet';
+        if (finished) {
+          // Spring animation completed - switch to static mode
+          animationStateSharedValue.value = 'static';
+          
+          // If drawer was closed (progress 0), remove from z-index order after animation
+          if (targetProgressValue === 0) {
+            // Use runOnJS to call React state update from worklet
+            runOnJS(removeFromZIndexOrder)(side);
+          }
+        }
+      });
+      
+      // Also update target progress for consistency
+      targetProgressSharedValue.value = targetProgressValue;
+    };
+
+    // Execute the worklet on the UI thread
+    runOnUI(animationWorklet)();
+
     return targetProgressValue;
-  }, [animationState, currentProgress, targetProgress, removeFromZIndexOrder, openDrawer, closeDrawer]);
+  }, [
+    currentProgressTop, currentProgressRight, currentProgressBottom, currentProgressLeft,
+    targetProgressTop, targetProgressRight, targetProgressBottom, targetProgressLeft,
+    animationStateTop, animationStateRight, animationStateBottom, animationStateLeft,
+    removeFromZIndexOrder, openDrawer, closeDrawer
+  ]);
 
   const openDrawerAnimated = useCallback((side: DrawerSide) => {
     // Trigger the same animation system used by gestures
@@ -305,21 +324,26 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
       }
     })
     .onStart((event) => {
+      'worklet';
       const startX = event.x;
       const startY = event.y;
       
       const drawer = findActiveDrawer(startX, startY);
       if (drawer && !activeDrawer) {
-        setActiveDrawer(drawer);
+        runOnJS(setActiveDrawer)(drawer);
         
         // Set global user-select none during drag (web only)
         runOnJS(setGlobalUserSelectNone)();
         
         // Bring drawer to front immediately when starting drag
-        openDrawer(drawer);
+        runOnJS(openDrawer)(drawer);
         
         // Set animation state to 'gesture' - gesture has control
-        animationState[drawer].value = 'gesture';
+        const animationStateSharedValue = drawer === 'top' ? animationStateTop :
+                                        drawer === 'right' ? animationStateRight :
+                                        drawer === 'bottom' ? animationStateBottom :
+                                        animationStateLeft;
+        animationStateSharedValue.value = 'gesture';
         
         // Reset all close gesture translations when starting a new main gesture
         // This prevents interference with the spring animation
@@ -328,13 +352,27 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
       }
     })
     .onUpdate((event) => {
+      'worklet';
       if (activeDrawer) {
         // Update shared values directly for maximum performance
         translationX.value = event.translationX;
         translationY.value = event.translationY;
+        
+        // Update currentProgress during gesture for smooth animations
+        const currentProgressSharedValue = activeDrawer === 'top' ? currentProgressTop :
+                                         activeDrawer === 'right' ? currentProgressRight :
+                                         activeDrawer === 'bottom' ? currentProgressBottom :
+                                         currentProgressLeft;
+        
+        const gestureProgress = calculateProgress(
+          { x: event.translationX, y: event.translationY },
+          activeDrawer
+        );
+        currentProgressSharedValue.value = Math.max(0, Math.min(1, gestureProgress));
       }
     })
     .onEnd((event) => {
+      'worklet';
       if (activeDrawer) {
         // Remove global user-select none when drag ends (web only)
         runOnJS(removeGlobalUserSelectNone)();
@@ -349,7 +387,7 @@ export const DrawerProvider: React.FC<DrawerProviderProps> = ({ children, option
         snapToPosition(activeDrawer, finalProgress);
         
         // Set active drawer to null for spring animation mode
-        setActiveDrawer(null);
+        runOnJS(setActiveDrawer)(null);
         
         // Reset translations using animation callback instead of setTimeout
         translationX.value = withSpring(0, { duration: 100 });

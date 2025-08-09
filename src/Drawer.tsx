@@ -9,12 +9,11 @@ import { getDrawerStaticPosition } from './utils';
 export interface DrawerRenderProps {
   animatedStyle: any;
   isOpen: boolean;
-  progress: any;
-  animationState: any;
   width: number;
   height: number;
   open: () => void;
   close: () => void;
+  // Note: Removed progress and animationState to prevent shared value access during render
 }
 
 export interface DrawerProps extends UseDrawerStateProps {
@@ -44,8 +43,6 @@ const DrawerComponent: React.FC<DrawerProps> = ({
   const renderProps: DrawerRenderProps = {
     animatedStyle: drawerState.animatedStyle,
     isOpen: drawerState.isOpen,
-    progress: drawerState.progress,
-    animationState: drawerState.animationState,
     width: drawerState.width,
     height: drawerState.height,
     open: drawerState.open,
